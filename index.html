@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container text-center">
+        <div class="row pt-3 justify-content-md-center noprint">
+            <div class="col-6 card">
+                <div class="row g-3 align-items-center justify-content-md-center noprint noprint">
+                    <div class="col-3">
+                      <label for="input_N_repetir" class="col-form-label">Veces a Repetir Tarjeta</label>
+                    </div>
+                    <div class="col-3">
+                      <input type="number" id="input_N_repetir" value="1" class="form-control" aria-describedby="passwordHelpInline">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 card">
+                    <div class=" input-group mb-1 card-body">
+                        <label class="input-group-text" for="input-excel">Upload</label>
+                        <input type="file" class="form-control" id="input-excel">
+                    </div>
+            </div>
+            <div class="col-3 card">
+                <div class="card-body d-none" id="btns-imprimir">
+                    <button type="button" class="btn btn-success" onclick="LeerExcelTarjetas();">Crear Tarjetas</button>
+                    <button type="button" class="btn btn-info "  onclick="window.print();">Imprimir</button>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="row justify-content-md-center">
+            <div class="row align-self-start" id="hoja">
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var hoja = document.getElementById("hoja");
+        var titulos;
+        var saltoPag = false;
+        var tarjetasRepetidas = 1;
+        let archivoSeleccionado;
+        // Espera a que se seleccione un archivo
+        document.getElementById('input-excel').addEventListener('change', function(e) {
+            archivoSeleccionado = e.target.files[0];
+            
+            document.getElementById("btns-imprimir").className = "card-body d-block";
+            LeerExcelTarjetas();
+        });
+
+        function LeerExcelTarjetas(){
+            // Resetear
+            hoja.innerHTML = "";
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(archivoSeleccionado);
+            reader.onload = function(e) {
+                var data = new Uint8Array(reader.result);
+                var workbook = XLSX.read(data, {type: 'array'});
+                
+                // Aquí asumimos que tu Excel tiene una sola hoja y usamos el primer nombre de hoja
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+                
+                // Convertir la hoja a un array de arrays
+                var rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                
+                tarjetasRepetidas = document.getElementById("input_N_repetir").value;
+                titulos = rows[0];
+                saltoPag = false;
+                var contadorTarjetas = 0;
+                // Iterar sobre cada fila y imprimir en consola
+                rows.forEach(function(row, index) {
+                    //REPETIR TARJETA
+                    var contRepetir = 0;
+                    while(contRepetir < tarjetasRepetidas){
+                        if( index != 0 && row.length > 0){
+                            CrearTarjeta(row, contadorTarjetas);
+                            contadorTarjetas++;
+                        }
+                        contRepetir++;
+                    }
+                });
+            }
+        }
+        
+        function CrearTarjeta(row, index){
+            //Contenedor
+            var tarjeta = document.createElement('div');
+            tarjeta.className = "col-4 border border-black d-flex flex-column justify-content-center";
+            //Contenedor Logo
+            var divLogo = document.createElement('div');
+            divLogo.className = "position-relative";
+            divLogo.innerHTML = "<img src='./logo-mersol-sureste.jpg' class='z-1 logo position-absolute'></img>";
+            tarjeta.appendChild(divLogo);
+            //Salto de pag cada 21 tarjetas
+            if(saltoPag==true){
+                tarjeta.className += " saltopagina";
+                saltoPag = false;
+            }
+            if(index % 21 === 0){
+                saltoPag = true;
+            }
+            //Contenido
+            row.forEach(function(col, j) {
+                var txt = document.createElement('p');
+                if(titulos[j].length>4){
+                    txt.innerHTML = "<b>"+titulos[j].slice(0, 4) + "</b>: "+col;
+                }else{
+                    txt.innerHTML = "<b>"+titulos[j]+"</b>: "+col;
+                }
+                tarjeta.appendChild(txt);
+            });
+            hoja.appendChild(tarjeta);
+        }
+      </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+</body>
+</html>

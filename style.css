@@ -1,0 +1,43 @@
+@page {
+    size: letter portrait; /* Define el tamaño como carta y orientación vertical */
+    margin: 0mm; /* Establece los márgenes a cero */
+}
+@media print {
+    .saltopagina{
+        page-break-before:always;
+    }
+    .noprint{
+        display: none;
+    }
+    .container{
+        margin: 0 !important; 
+        padding: 0 !important;
+    }
+    .row {
+        width: 21.59cm;
+        margin: 0 !important; 
+        padding: 0 !important;
+        overflow: hidden;
+      }
+    .row>*{
+        margin: 0 !important; 
+        padding: 0 !important;
+    }
+
+}
+.logo{
+    top: -1.75rem;
+    left: 0.25rem;
+    width: 3.5rem;
+}
+p{
+    line-height: 0.75rem;
+    margin-top: 0rem;
+    margin-bottom: 0rem;
+    padding: 0 !important;
+    font-size: 0.8rem!important;
+}
+.col-4{
+    /*width: 21.59cm;*/
+    height: 3.8cm;
+}
